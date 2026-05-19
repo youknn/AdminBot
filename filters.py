@@ -1,6 +1,7 @@
 from aiogram import Bot
 from aiogram.types import Message, ChatMemberAdministrator, ChatMemberOwner
 from functools import wraps
+from typing import Optional  # ← БЫЛ ПРОПУЩЕН ЭТОТ ИМПОРТ
 import re
 
 
@@ -26,7 +27,6 @@ async def bot_is_admin(bot: Bot, chat_id: int) -> bool:
 
 
 def admin_only(func):
-    """Декоратор: только для админов чата"""
     @wraps(func)
     async def wrapper(message: Message, *args, **kwargs):
         if message.chat.type == "private":
@@ -39,7 +39,6 @@ def admin_only(func):
 
 
 def group_only(func):
-    """Декоратор: только в группах"""
     @wraps(func)
     async def wrapper(message: Message, *args, **kwargs):
         if message.chat.type == "private":
@@ -60,13 +59,11 @@ def contains_arabic(text: str) -> bool:
 
 
 async def get_target_user(message: Message):
-    """Получить цель команды (реплай или упоминание)"""
     if message.reply_to_message:
         return message.reply_to_message.from_user
 
     args = message.text.split()[1:] if message.text else []
     if args:
-        # Попробовать найти по @username или ID
         target = args[0].lstrip("@")
         try:
             user_id = int(target)
@@ -82,9 +79,6 @@ async def get_target_user(message: Message):
 
 
 def parse_time(time_str: str) -> Optional[int]:
-    """Парсит время: 1h, 30m, 1d -> секунды"""
-    import re
-    from typing import Optional
     units = {"s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}
     match = re.match(r"^(\d+)([smhdw]?)$", time_str.lower())
     if match:
